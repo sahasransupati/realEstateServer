@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 
 const Buy = require('../models/buy');
+const cors = require('./cors');
 
 var authenticate = require('../authenticate');
 
@@ -11,7 +12,8 @@ const buyRouter = express.Router();
 buyRouter.use(bodyParser.json());
 
 buyRouter.route('/')
-.get((req,res,next) => {
+.options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
+.get(cors.cors,(req,res,next) => {
     Buy.find({})
     .then((buy) => {
         res.statusCode = 200;
@@ -20,7 +22,7 @@ buyRouter.route('/')
     }, (err) => next(err))
     .catch((err) => next(err));
 })
-.post(authenticate.verifyUser, authenticate.verifyAdmin,(req, res, next) => {
+.post(cors.corsWithOptions,authenticate.verifyUser, authenticate.verifyAdmin,(req, res, next) => {
     Buy.create(req.body)
     .then((buy) => {
         console.log('Buyable Property Created ', buy);
@@ -30,11 +32,11 @@ buyRouter.route('/')
     }, (err) => next(err))
     .catch((err) => next(err));
 })
-.put(authenticate.verifyUser, authenticate.verifyAdmin,(req, res, next) => {
+.put(cors.corsWithOptions,authenticate.verifyUser, authenticate.verifyAdmin,(req, res, next) => {
     res.statusCode = 403;
     res.end('PUT operation not supported on /buy');
 })
-.delete(authenticate.verifyUser, authenticate.verifyAdmin,(req, res, next) => {
+.delete(cors.corsWithOptions,authenticate.verifyUser, authenticate.verifyAdmin,(req, res, next) => {
     Buy.remove({})
     .then((resp) => {
         res.statusCode = 200;
