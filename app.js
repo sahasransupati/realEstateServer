@@ -4,22 +4,30 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
+var passport = require('passport');
+var authenticate = require('./authenticate');
+
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 
 var buyRouter = require('./routes/buyRouter');
 var rentRouter = require('./routes/rentRouter');
 
+const uploadRouter = require('./routes/uploadRouter');
+
 const mongoose = require('mongoose');
 
 var session = require('express-session');
 var FileStore = require('session-file-store')(session);
 
+var config = require('./config');
+
 const Buy = require('./models/buy');
 const Rent = require('./models/rent');
 const User = require('./models/user');
 
-const url = 'mongodb://localhost:27017/realEstate';
+const url = config.mongoUrl;
+
 const connect = mongoose.connect(url);
 
 connect.then((db) => {
@@ -39,6 +47,9 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use(passport.initialize());
+app.use(passport.session());
+
 // Secure traffic only
 app.all('*', (req, res, next) => {
   if (req.secure) {
@@ -51,7 +62,7 @@ app.all('*', (req, res, next) => {
 
 app.use('/buy',buyRouter);
 app.use('/rent',rentRouter);
-
+app.use('/imageUpload',uploadRouter);
 
 app.use(session({
   name: 'session-id',
@@ -65,28 +76,6 @@ app.use(session({
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
-function auth (req, res, next) {
-  console.log(req.session);
-
-  if(!req.session.user) {
-      var err = new Error('You are not authenticated!');
-      err.status = 403;
-      return next(err);
-  }
-  else {
-    if (req.session.user === 'authenticated') {
-      next();
-    }
-    else {
-      var err = new Error('You are not authenticated!');
-      err.status = 403;
-      return next(err);
-    }
-  }
-}
-
-
-app.use(auth);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

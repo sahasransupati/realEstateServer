@@ -4,6 +4,8 @@ const mongoose = require('mongoose');
 
 const Buy = require('../models/buy');
 
+var authenticate = require('../authenticate');
+
 const buyRouter = express.Router();
 
 buyRouter.use(bodyParser.json());
@@ -18,7 +20,7 @@ buyRouter.route('/')
     }, (err) => next(err))
     .catch((err) => next(err));
 })
-.post((req, res, next) => {
+.post(authenticate.verifyUser, authenticate.verifyAdmin,(req, res, next) => {
     Buy.create(req.body)
     .then((buy) => {
         console.log('Buyable Property Created ', buy);
@@ -28,11 +30,11 @@ buyRouter.route('/')
     }, (err) => next(err))
     .catch((err) => next(err));
 })
-.put((req, res, next) => {
+.put(authenticate.verifyUser, authenticate.verifyAdmin,(req, res, next) => {
     res.statusCode = 403;
     res.end('PUT operation not supported on /buy');
 })
-.delete((req, res, next) => {
+.delete(authenticate.verifyUser, authenticate.verifyAdmin,(req, res, next) => {
     Buy.remove({})
     .then((resp) => {
         res.statusCode = 200;
