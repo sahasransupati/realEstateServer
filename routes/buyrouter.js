@@ -14,6 +14,7 @@ buyRouter.use(bodyParser.json());
 buyRouter.route('/')
 .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 .get(cors.cors,(req,res,next) => {
+    console.log("In buy GET");
     Buy.find({})
     .then((buy) => {
         res.statusCode = 200;

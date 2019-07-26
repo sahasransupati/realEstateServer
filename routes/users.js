@@ -10,7 +10,7 @@ var authenticate = require('../authenticate');
 usersRouter.use(bodyParser.json());
 
 usersRouter.post('/signup', (req, res, next) => {
-  User.register(new User({email: req.body.email}), 
+  User.register(new User({username: req.body.username}), 
     req.body.password, (err, user) => {
     if(err) {
       res.statusCode = 500;
